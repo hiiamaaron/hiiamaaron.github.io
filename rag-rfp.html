@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RFP RAG — Stacked Retrievers | Aaron (배동우)</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-alt1: #111827;
+      --bg-alt2: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      --card-dark: #1f2937;
+      --text-light: #f3f4f6;
+      --accent-blue: #3b82f6;
+      --muted: #9ca3af;
+      --shadow-dark: 0 2px 10px rgba(0,0,0,0.4);
+      --hover-glow: 0 0 12px rgba(59,130,246,0.22);
+      --radius-lg: 1.5rem;
+      --radius-md: 1.0rem;
+      --max-width: 1000px;
+    }
+
+    * { box-sizing: border-box; scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      margin: 0;
+      line-height: 1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 0.9rem 0.6rem;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(59,130,246,0.12);
+    }
+    nav a { color: var(--text-light); text-decoration: none; font-weight: 500; transition: color .25s; }
+    nav a:hover { color: var(--accent-blue); }
+
+    header {
+      background: linear-gradient(90deg,#2563eb,#0891b2);
+      color: white;
+      text-align: center;
+      padding: 6.2rem 1rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .profile-photo {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.9);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
+
+    header h1 { font-size: 1.6rem; margin: 0; }
+    header p { margin: 0; color: #e0f2fe; font-size: 0.98rem; }
+
+    main {
+      max-width: var(--max-width);
+      margin: 2rem auto;
+      padding: 1.2rem;
+    }
+
+    .project-shell {
+      background: var(--bg-alt1);
+      border-radius: var(--radius-lg);
+      padding: 1.6rem;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #93c5fd;
+      padding-bottom: 0.35rem;
+      border-bottom: 2px solid rgba(55,65,81,0.7);
+      text-shadow: 0 0 6px rgba(147,197,253,0.35);
+    }
+
+    section { margin: 1.25rem 0; }
+    p { color: #e5e7eb; margin: 0.6rem 0; }
+    .dual { color: #a1a1aa; font-size: 0.95em; display:block; margin-top:0.4rem; }
+
+    .metric-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .metric-table th, .metric-table td {
+      border: 1px solid #334155;
+      padding: 0.6rem;
+      text-align: center;
+    }
+    .metric-table th { background: #1e293b; color: #93c5fd; }
+
+    pre.code {
+      background: #0b1220;
+      border: 1px solid #334155;
+      color: #dbeafe;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    figure { text-align: center; margin: 1rem 0; }
+    figure img {
+      width: 100%;
+      max-height: 460px;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    }
+    figcaption { margin-top: 0.6rem; color: var(--muted); font-size: 0.95rem; }
+
+    .back-link { display:block; text-align:center; margin-top:1.6rem; color:#93c5fd; text-decoration:none; }
+    .back-link:hover { text-decoration: underline; }
+
+    .footer {
+      text-align: center;
+      padding: 1.6rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      background-color: #0d162b;
+      border-top-left-radius: 1.2rem;
+      border-top-right-radius: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width:800px) {
+      :root { --max-width: 92%; }
+      header { padding-top: 5.8rem; }
+      .profile-photo { width:76px; height:76px; }
+    }
+
+    code {
+      background-color: #0b1220;
+      color: #fb923c;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    ul { margin: 0.8rem 0 0.8rem 1.2rem; }
+    li { margin-bottom: 0.45rem; }
+    .note { color: var(--muted); font-size: 0.9rem; font-style: italic; }
+
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html#about">About</a>
+    <a href="index.html#projects">Projects</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg" alt="Profile photo" class="profile-photo" />
+    <h1>Request for Proposal — Stacked Retrievers (RAG)</h1>
+    <p>100부 한국어 제안요청서 문서 기반의 Retrieval-Augmented Generation 실험</p>
+  </header>
+
+  <main>
+    <div class="project-shell">
+      <section aria-labelledby="overview">
+        <h2 id="overview">📘 Overview</h2>
+        <p>
+          Built and evaluated a Retrieval-Augmented Generation (RAG) system for 100 Korean Request For Proposal (RFP) documents.
+          Focus: parser comparison (Unstructured IO, MuPDF, pdfplumber), embedding model comparison (SNUNLP S-BERT vs OpenAI text-embedding-ada-002),
+          and stacked retriever experiments with FAISS.
+          <span class="dual">100부의 한국어 제안요청서를 대상으로 RAG 시스템을 구현·평가했습니다. 파서, 임베딩, 스택형 검색기 비교가 주요 포인트입니다.</span>
+        </p>
+      </section>
+
+      <section aria-labelledby="role">
+        <h2 id="role">👥 Role & Preprocessing</h2>
+        <p>
+          Developed preprocessing tooling and led parser/embedding experiments: converted 98 HWP → PDF (Python), handled conversion anomalies (42 files required manual fixes), and normalized chunking for embedding.
+          <span class="dual">전처리 도구를 개발하고 파서/임베딩 실험을 주도했습니다. 98부의 HWP 파일을 자동으로 PDF로 변환하는 스크립트를 작성했고,
+          변환 중 42부 문서에서 '한 페이지에 두 페이지가 병합'되는 오류를 수동으로 보정해 정상 파싱을 확보했습니다.</span>
+        </p>
+      </section>
+
+      <section aria-labelledby="parser">
+        <h2 id="parser">🧭 Parser comparison (Unstructured IO / MuPDF / pdfplumber)</h2>
+        <p>
+          Compared three parsing approaches. Unstructured IO sometimes flattened table semantics, so MuPDF + pdfplumber was adopted for more reliable structure extraction.
+          <span class="dual">세 가지 파서를 비교한 결과, Unstructured IO는 표/도표의 행·열 구조 정보가 제대로 보존되지 않는 경우가 있어 최종적으로 MuPDF와 pdfplumber 조합을 채택했습니다.</span>
+        </p>
+        <p class="note">(Practical note: Unstructured IO can be strong for some layouts but may lose table row/column structure — see project report.)</p>
+        <span class="dual">(실무 노트: Unstructured IO는 특정 레이아웃 처리에 강점이 있으나 표의 의미적 구조가 평탄화되는 사례가 있어 보고서에 케이스를 기록했습니다.)</span>
+      </section>
+
+      <section aria-labelledby="embeddings">
+        <h2 id="embeddings">🧩 Embedding experiments (S-BERT vs OpenAI)</h2>
+        <p>
+          Two embedding pipelines compared:
+          <ul>
+            <li><strong>SNUNLP S-BERT</strong> (snunlp/KR-SBERT-V40K-klueNLI-augSTS) → ChromaDB</li>
+            <li><strong>OpenAI</strong> text-embedding-ada-002 → ChromaDB</li>
+          </ul>
+          For each pipeline we plotted normalized vector length histograms and t-SNE on original embeddings to inspect distributional properties.
+          <span class="dual">(1) 서울대학교 S-BERT, (2) OpenAI text-embedding-ada-002를 각각 Chroma에 저장하고, 정규화한 벡터 길이 히스토그램과 정규화하지 않은 임베딩의 t-SNE를 비교·시각화했습니다.</span>
+        </p>
+
+        <figure>
+          <img src="rag-rfp-parser.png" alt="Embedding vector length histogram placeholder">
+          <figcaption>
+            Normalized vector length histogram and t-SNE plot for each parser: Unstructured (left), MuPDF (middle), pdfplumber (right).
+            <span class="dual">
+              실제 이미지는 각 파서(Unstructured, MuPDF, pdfplumber) 및 임베딩 모델별로 생성된 정규화된 벡터 길이 히스토그램·t-SNE 플롯을 포함합니다.
+            </span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="rag-rfp-sbert.png" alt="t-SNE embedding placeholder">
+          <figcaption>
+            Histogram of normalized vector length (left), non-normalized vector length (middle), and t-SNE of non-normalized embeddings (right) — used to inspect semantic cluster structure.
+            <span class="dual">
+              정규화된 벡터 길이 히스토그램(좌), 비정규화된 벡터 길이 히스토그램(중), 비정규화된 임베딩의 t-SNE 그래프(우).
+            </span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section aria-labelledby="evaluation">
+        <h2 id="evaluation">❓ 22-Question Evaluation (Qualitative)</h2>
+        <p>
+          We prepared 22 domain-specific queries (example list below) and evaluated responses across three parser data-sets (Original / Plumber / MUP) using OpenAI's text-embedding-ada-002 retrieval pipeline. Responses were manually scored: <strong>+2 (richer), +1 (correct), -1 (incorrect or partially wrong)</strong>.
+        <span class="dual">
+          22개의 도메인 질문(아래 예시)을 만들어 3개 파서 데이터셋(기존 / Plumber / MUP)에서의 응답을 OpenAI 임베딩 기반 RAG로 얻어 수동 평가했습니다. 평가는 <strong>+2(정보가 더 풍부함), +1(정확함), -1(오류 포함)</strong> 기준입니다.
+        </span>
+      </p>
+
+      <p><strong>Sample questions (selected):</strong></p>
+      <ul>
+        <li>국민연금공단이 발주한 이러닝시스템 관련 사업 요구사항을 정리해 줘. / Summarize the e-learning project requirements by 국민연금공단.</li>
+        <li>공고 번호가 20240821893인 사업 이름이 뭐야? / What is the project title for announcement 20240821893?</li>
+        <li>입찰 마감일이 2024년 12월인 사업을 알려줘. / List projects with bid close date in Dec 2024.</li>
+        <li>한국한의학연구원 통합정보 시스템 고도화 용역 사업의 모든 요구사항 목록을 알려줘. / List all requirement identifications and names for the Korean Institute of Oriental Medicine project.</li>
+      </ul>
+
+      <p class="note">
+        Key qualitative observation: OpenAI+MUP data-set produced the most useful and specific answers overall; OpenAI+Plumber often omitted official announcement numbers in summaries and produced overly short summaries. Full scoring table is available in the project report.
+        <span class="dual">
+          정성적 관찰: OpenAI+MUP 조합이 가장 구체적이고 유용한 응답을 제공했으며, OpenAI+Plumber는 공고번호 누락이나 지나치게 간단한 요약을 보이는 경향이 있었습니다. 전체 평점표는 보고서에 포함되어 있습니다.
+        </span>
+      </p>
+
+      <table class="metric-table" aria-label="qualitative scoring example">
+        <thead>
+          <tr><th>Data-Set</th><th>+2 (richer)</th><th>+1 (correct)</th><th>-1 (incorrect)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>OpenAI + MUP (example)</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>OpenAI + Plumber (example)</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <p class="note" style="text-align:center;">*Table above is a placeholder showing structure — see the project report for the complete scoring matrix.* <span class="dual">위 표는 형식 예시이며 전체 평점 표는 프로젝트 보고서에 수록되어 있습니다.</span></p>
+    </section>
+      </section>
+
+      <section aria-labelledby="faiss">
+        <h2 id="faiss">🔧 FAISS — Stacked Retriever Pipeline</h2>
+        <p>
+          Implemented a prototype stacked retriever (hybrid search → multi-query → re-rank → contextual compression) and tested with Unstructured IO parsed docs and OpenAI embeddings. Components: MultiVectorRetriever, MultiQueryRetriever, BM25 hybrid, CrossEncoder re-ranker, LLM-based contextual compressor.
+          <span class="dual">하이브리드 검색 → 다중 질의 → 재정렬 → 문맥 압축 흐름의 프로토타입을 구현했습니다.</span>
+        </p>
+
+        <pre class="code"><code>def create_stacked_retriever(base_retriever):
+    """Full pipeline: hybrid → multi-query → re-rank → contextual compression."""
+    return add_compression(
+        add_reranking(
+            add_multi_query(
+                add_hybrid_search(base_retriever)
+            )
+        )
+    )</code></pre>
+      </section>
+
+      <section aria-labelledby="next">
+        <h2 id="next">💡 Reflection & Next steps</h2>
+        <p>
+          Lessons: parser choice affects downstream retrieval; embedding normalization shapes retriever design; and human-scored qualitative evaluation is critical. Next steps: expand automatic table-structure parsing and fine-tune reranker models.
+          <span class="dual">파서 선택, 임베딩 정규화, 정성평가의 중요성을 확인했습니다. 다음 단계는 표 구조 자동화 및 재정렬기 튜닝입니다.</span>
+        </p>
+
+        <p class="note">Full notebooks, t-SNE/histograms, and evaluation matrices available in the repository and project report.</p>
+      </section>
+
+      <a href="index.html" class="back-link">← Back to Projects</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    © 2025 Aaron — Built with ❤️ using GitHub Pages
+  </footer>
+</body>
+</html>
