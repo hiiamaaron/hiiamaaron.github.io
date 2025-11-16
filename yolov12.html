@@ -246,6 +246,7 @@
     <section id="hyperparams">
       <h2>Optimized Hyper-Parameters</h2>
       <p>The final set of optimized hyper-parameters from Optuna tuning:</p>
+      <span class="dual">Optuna 튜닝을 통해 도출된 최종 최적 하이퍼파라미터:</span>
       <table class="hyperparam-table" aria-label="optimized hyper-parameters">
           <thead>
               <tr><th>Parameter</th><th>Value</th></tr>
@@ -292,6 +293,7 @@
     <section id="results">
       <h2>Results</h2>
       <p>Final validation summary after retraining:</p>
+      <span class="dual">재학습 이후 최종 검증 요약:</span>
       <table class="metric-table" aria-label="validation metrics">
         <thead>
           <tr><th>Precision</th><th>Recall</th><th>mAP@0.5</th></tr>
@@ -303,7 +305,9 @@
 
       <p>
         On unseen combined test sets (TS_3–TS_8), the retrained model obtained <strong>mAP@0.5 = 0.4586</strong>, up from baseline 0.3648 — indicating improved generalization after dataset merging.
-        <br /><span class="dual">보지 않은 테스트 세트에서 mAP@0.5가 0.4586으로 향상되었습니다.</span>
+        <br /><span class="dual">보지 못한 외부 통합 테스트 세트(TS_3–TS_8)에서 재학습된 모델은 기준 성능(baseline) mAP@0.5 = 0.3648 대비 0.4586을 기록하여, 
+          데이터셋 병합 이후 일반화 성능이 향상되었음을 확인했습니다.
+        </span>
       </p>
 
       <figure>
@@ -331,6 +335,7 @@
     <section id="perclass">
       <h2>Sample Per-Class Metrics</h2>
       <p>Selected per-class metrics from external validation:</p>
+      <span class="dual">외부 검증에서 선택된 클래스별 지표:</span>
 
       <table class="metric-table" aria-label="sample per-class metrics">
         <thead>

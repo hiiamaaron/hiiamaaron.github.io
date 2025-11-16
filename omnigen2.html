@@ -184,7 +184,6 @@
     <section id="project">
       <h2>Project Details | 프로젝트 상세</h2>
       <div class="project-grid">
-        <!-- Pipeline, frontend, backend same as old -->
         <div class="card">
           <h4>Multi-Modal Pipeline & Prompt Engineering</h4>
           <p>
@@ -236,9 +235,17 @@
             <li><strong>AdvertisementImagePreservation</strong>: Stores generated background images.</li>
             <li><strong>AdvertisementCopy</strong>: Stores generated advertisement text.</li>
           </ul>
+          <ul class="dual">
+            <li>세션(Session): 사용자별 고유 세션 ID를 데이터베이스에 저장합니다.</li>
+            <li>사용자(User): 사용자 이름, 암호화된 비밀번호, 이메일 정보를 저장합니다.</li>
+            <li>광고(Advertisement): 사용자 ID와 프롬프트 입력값을 저장합니다.</li>
+            <li>광고이미지보관(AdvertisementImagePreservation): 생성된 배경 이미지를 저장합니다.</li>
+            <li>광고문구(AdvertisementCopy): 생성된 광고 문구를 저장합니다.</li>
+          </ul>
           <p>
             All SQL classes have parent-child relationships. Click the flowchart to view full-size:
           </p>
+          <p class="dual">모든 SQLModel 클래스는 부모–자식 관계를 형성하며,전체 흐름을 확인하려면 아래의 플로우차트를 클릭해 확대해서 볼 수 있습니다.</p>
           <img src="omnigen2-sql.png" alt="SQLModel Flowchart" class="screenshot zoomable">
           <p class="dual">Click image to zoom | 클릭하여 확대</p>
         </div>
@@ -258,15 +265,13 @@
           Our advertisement generator web application in action | 광고 생성 웹 앱 동작 데모
         </p>
       </div>
-
-
-
-        <div class="card">
-          <h4>System Limitations & Performance</h4>
-          <p>
-            OmniGen2 required ~38 GB VRAM just for initialization, exceeding the available 24 GB on GCP L4 NVIDIA GPU.
-            Therefore, Stable Diffusion + GPT were used for deployment.
-            <pre>
+      
+      <div class="card">
+        <h4>System Limitations & Performance</h4>
+        <p>
+          OmniGen2 required ~38 GB VRAM just for initialization, exceeding the available 24 GB on GCP L4 NVIDIA GPU.
+          Therefore, Stable Diffusion + GPT were used for deployment.
+          <pre>
 translate_korean_to_english      2.31 s
 generate_initial_prompt          3.54 s
 extract_keywords                 1.14 s
@@ -280,60 +285,61 @@ translate_english_to_korean      5.40 s
 generate_ad_copy                  5.40 s
 initialize_pipelines            113.52 s
 Total                           400.63 s (~6.7 min)
-            </pre>
-            <span class="dual">
-            GPU 메모리 제한으로 OmniGen2는 사용 불가 → Stable Diffusion + GPT로 대체. 전체 실행 시간 약 6분 40초.</span>
-          </p>
-        </div>
+          </pre>
+          <span class="dual">
+            GPU 메모리 제한으로 OmniGen2는 사용 불가 → Stable Diffusion + GPT로 대체. 전체 실행 시간 약 6분 40초.
+          </span>
+        </p>
       </div>
-    </section>
-
-    <!-- ===== GALLERY ===== -->
-    <section id="gallery">
-      <h2>Generated Advertisement Images | 생성된 광고 이미지</h2>
-      <div class="project-grid">
-        <div class="card">
-          <img src="omnigen2-ad-1.png" alt="Generated Ad 1" class="screenshot zoomable">
-          <p class="dual">사용자 생성 광고 이미지 1</p>
-        </div>
-        <div class="card">
-          <img src="omnigen2-ad-2.png" alt="Generated Ad 2" class="screenshot zoomable">
-          <p class="dual">사용자 생성 광고 이미지 2</p>
-        </div>
+    </div>
+  </section>
+  
+  <!-- ===== GALLERY ===== -->
+  <section id="gallery">
+    <h2>Generated Advertisement Images | 생성된 광고 이미지</h2>
+    <div class="project-grid">
+      <div class="card">
+        <img src="omnigen2-ad-1.png" alt="Generated Ad 1" class="screenshot zoomable">
+        <p class="dual">사용자 생성 광고 이미지 1</p>
       </div>
-    </section>
+      <div class="card">
+        <img src="omnigen2-ad-2.png" alt="Generated Ad 2" class="screenshot zoomable">
+        <p class="dual">사용자 생성 광고 이미지 2</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- ===== CONTACT ===== -->
+  <section id="contact">
+    <h2>Contact | 연락처</h2>
+    <p>
+      💼 <a href="https://github.com/hiiamaaron" target="_blank">GitHub Profile</a><br />
+      🔗 <a href="https://www.linkedin.com/in/raffaello-sanzio-da-urbino-703897345/" target="_blank">LinkedIn</a><br />
+      📧 <a href="mailto:projectares777@gmail.com">projectares777@gmail.com</a><br />
+    </p>
+  </section>
+</main>
 
-    <!-- ===== CONTACT ===== -->
-    <section id="contact">
-      <h2>Contact | 연락처</h2>
-      <p>
-        💼 <a href="https://github.com/hiiamaaron" target="_blank">GitHub Profile</a><br />
-        🔗 <a href="https://www.linkedin.com/in/raffaello-sanzio-da-urbino-703897345/" target="_blank">LinkedIn</a><br />
-        📧 <a href="mailto:projectares777@gmail.com">projectares777@gmail.com</a><br />
-      </p>
-    </section>
-  </main>
-
-  <div class="footer">
-    © 2025 Aaron — Built with ❤️ using GitHub Pages
-  </div>
+<div class="footer">
+  © 2025 Aaron — Built with ❤️ using GitHub Pages
+</div>
 
   <!-- ===== LIGHTBOX JS ===== -->
   <div id="lightbox" onclick="this.style.display='none'">
     <img id="lightbox-img" src="">
   </div>
-
+  
   <script>
-    const zoomableImages = document.querySelectorAll('.zoomable');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-
-    zoomableImages.forEach(img => {
-      img.addEventListener('click', () => {
-        lightbox.style.display = 'flex';
-        lightboxImg.src = img.src;
-      });
+  const zoomableImages = document.querySelectorAll('.zoomable');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  
+  zoomableImages.forEach(img => {
+    img.addEventListener('click', () => {
+      lightbox.style.display = 'flex';
+      lightboxImg.src = img.src;
     });
+  });
   </script>
 </body>
 </html>
